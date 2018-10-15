@@ -1,0 +1,20 @@
+# 生产环境配置
+spring:
+  profiles:
+   # 生产环境标识
+    active: prod
+    # 引入核心配置
+    include: core
+  datasource:
+
+    type: com.alibaba.druid.pool.DruidDataSource
+
+    driver-class-name: com.mysql.jdbc.Driver
+
+    url: jdbc:mysql://localhost:3306/academy_blibli?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false
+    username: arthur
+    password: arthur
+server:
+  port: 20535
+  tomcat:
+    basedir: /data/services/academy-project-server/admin/temp

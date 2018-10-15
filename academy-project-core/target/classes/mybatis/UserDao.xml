@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blibli.academy.project.mapper.UserMapper">
+    <select id="findByid" parameterType="Long" resultType="user">
+        SELECT * FROM user us where us.id = #{id}
+    </select>
+
+    <select id="findUserList" parameterType="com.blibli.academy.project.query.UserQuery" resultType="com.blibli.academy.project.Business.dto.UserListDto">
+        SELECT * FROM user WHERE 1 = 1
+        <if test="id!=null ">
+            AND id = #{id}
+        </if>
+        <if test="nickname!=null">
+            AND nickname = #{nickname}
+        </if>
+        <if test="phone!=null ">
+            and phone = #{phone}
+        </if>
+        <if test="email!=null">
+            AND email = #{email}
+        </if>
+        <if test="data!=null">
+            <if test="data[0]!=null">
+                AND data >= ${data[0]}
+            </if>
+            <if test="data[1]!=null">
+                AND ${data[1]} >= data
+            </if>
+        </if>
+        <if test="address!=null">
+            and address = #{address}
+        </if>
+        <if test="grade!=null and grade!=0">
+            and grade = #{grade}
+        </if>
+        <if test="status!= null">
+            AND status = #{status}
+        </if>
+    </select>
+</mapper>

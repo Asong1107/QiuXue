@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blibli.academy.project.mapper.UserDaoLast">
+
+    <!--角色列表-->
+    <select id="findRoleList" resultType="com.blibli.academy.project.Business.pojo.Role">
+        select * from role
+    </select>
+
+    <!--更新角色数据-->
+    <select id="findRoleData" parameterType="Long" resultType="com.blibli.academy.project.Business.pojo.Role">
+        select role_name,module_id from role_module left join role on (role_module.role_id=role.role_id) where role_module.role_id=#{roleId};
+    </select>
+
+
+    <update id="updateRoleId" parameterType="com.blibli.academy.project.Business.pojo.Role">
+        update role set role_name=#{roleName} where role_id=#{roleId}
+    </update>
+
+    <!--删除角色-->
+    <delete id="deleteRoleModuleId" parameterType="Long">
+        delete from role_module where role_id=#{roleId}
+    </delete>
+
+    <delete id="deleteRole" parameterType="Long">
+        delete user_service,role from role LEFT JOIN user_service ON user_service.role_id=role.role_id where role.role_id=#{roleId}
+    </delete>
+
+    <!--新增角色赋予角色权限-->
+    <insert id="insertRole" parameterType="com.blibli.academy.project.Business.pojo.Role">
+        insert into role ( role_id,role_name, create_by, update_by, create_at, update_at) values (#{roleId},#{roleName},#{createBy},#{updateBy},#{createAt},#{updateAt});
+    </insert>
+
+    <select id="getInsertRoleId" parameterType="String" resultType="Long">
+        select role_id from role where role_name=#{roleName}
+    </select>
+
+    <insert id="insertRoleModule" parameterType="com.blibli.academy.project.Business.pojo.RoleModule">
+        insert into role_module (role_id, module_id) VALUES (#{roleId},#{moduleId})
+    </insert>
+
+    <!--模块儿列表-->
+    <select id="findModuleList" resultType="com.blibli.academy.project.Business.pojo.Module">
+        select * from module
+    </select>
+
+    <!--编辑模块儿详情-->
+    <select id="findModuleId" parameterType="Long" resultType="com.blibli.academy.project.Business.pojo.Module">
+        select * from module where id=#{id}
+    </select>
+
+    <!--更新模块儿数据-->
+    <update id="updateModule" parameterType="com.blibli.academy.project.Business.pojo.Module">
+        update module set  name=#{name},url=#{url},parent_id=#{parentId},permission=#{permission},update_by=#{updateBy},update_at=#{updateAt} where id=#{id}
+    </update>
+
+    <!--插入新模块儿-->
+    <insert id="insertModule" parameterType="com.blibli.academy.project.Business.pojo.Module">
+        insert into module (id, name, url, permission,parent_id, create_by, update_by, create_at, update_at) values (#{id}, #{name}, #{url}, #{permission}, #{parentId}, #{createBy}, #{updateBy}, #{createAt}, #{updateAt});
+    </insert>
+
+    <!--模块儿删除-->
+    <delete id="deleteModuleId" parameterType="Long" >
+        delete from module where id=#{id}
+    </delete>
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blibli.academy.project.mapper.UserDao">
+
+
+    <!--登陆验证-->
+ <select id="findUsername" parameterType="String" resultType="com.blibli.academy.project.Business.pojo.UserService">
+    select user_service.*,role.role_name from user_service,role WHERE username = #{username} And role.role_id=user_service.role_id
+</select>
+
+
+    <!--主页的mapper主要把当前登陆的管理员的  权限模块儿       传给前端 -->
+    <select id="findUserId" parameterType="String" resultType="Long">
+        select role_id from user_service where username=#{username}
+    </select>
+
+    <select id="findUserModule" parameterType="Long" resultType="com.blibli.academy.project.Business.pojo.Module">
+        select module.* from module left join role_module on (module.id=role_module.module_id and role_module.role_id=#{id});
+    </select>
+
+
+    <!--后台管理模块儿============== 账号管理======= 第二版===挂掉-->
+    <select id="getUserList" resultType="com.blibli.academy.project.Business.pojo.UserService">
+        select user_service.*,role.role_name from user_service left join role on user_service.role_id=role.role_id
+        <where>
+            <if test="roleId != null">
+                  role.role_id=#{roleId}
+            </if>
+            <if test="username != null">
+                AND user_service.username LIKE '%${username}%'
+            </if>
+        </where>
+        GROUP BY user_service.id ASC
+    </select>
+
+    <!--管理员账号新增-->
+    <insert id="insertAdmin" parameterType="com.blibli.academy.project.Business.pojo.UserService">
+        insert into user_service (username, password,phone,status,create_by, update_by,create_at,update_at, role_id) values (#{username},#{password},#{phone},#{status},#{createBy},#{updateBy},#{createAt},#{updateAt},#{roleId})
+    </insert>
+
+    <!--管理员账号信息修改-->
+    <select id="findAdminId" parameterType="Long" resultType="com.blibli.academy.project.Business.pojo.UserService">
+        select * from user_service where id=#{id}
+    </select>
+
+    <update id="updateAdmin" parameterType="com.blibli.academy.project.Business.pojo.UserService">
+        update user_service set username=#{username},password=#{password},phone=#{phone},role_id=#{roleId},update_by=#{updateBy},update_at=#{updateAt} where id=#{id}
+    </update>
+
+
+    <!--删除管理员账号-->
+    <delete id="deleteAdmin" parameterType="Long">
+        delete from user_service where id=#{id}
+    </delete>
+
+
+    <!--修改密码-->
+    <update id="updatePassword" parameterType="com.blibli.academy.project.Business.pojo.UserService">
+        update user_service set password=#{password} where username=#{username}
+    </update>
+
+
+</mapper>

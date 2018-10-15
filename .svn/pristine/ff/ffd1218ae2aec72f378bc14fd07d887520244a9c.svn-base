@@ -1,0 +1,16 @@
+package com.blibli.academy.project.query;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * 页数
+ * @author lixiaobai
+ * @program: project
+ * @create: 2018-08-13 14:34
+ */
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class PageQuery extends IQuer{
+    private Long userId;
+}

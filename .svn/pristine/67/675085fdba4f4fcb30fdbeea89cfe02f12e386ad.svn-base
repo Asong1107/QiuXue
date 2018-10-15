@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.blibli.academy.project.mapper.ReceptionDao">
+
+
+<!--前台视频 列表 已经修复-->
+<select id="getReceptionVideoList" parameterType="com.blibli.academy.project.pojo.VideoQuery" resultType="com.blibli.academy.project.Business.pojo.Video">
+    select video.*,user_video.collection_code,user_video.love_code,teacher.teacher_name,teacher.img_url from video  left join user_video  on (video.video_id=user_video.video_id and user_video.user_id=#{userId})
+    right join teacher on (video.teacher_id=teacher.id)
+    where
+     video.type=1 AND status=1
+    <if test="grade != null">
+        AND grade=#{grade}
+    </if>
+    <if test="subject != null">
+        AND subject=#{subject}
+    </if>
+     ORDER BY video.update_at DESC
+</select>
+
+
+
+    <!--前台查看视频详情-->
+    <select id="getVideoId" resultType="com.blibli.academy.project.Business.pojo.Video">
+        select video.*,user_video.collection_code,user_video.love_code ,teacher.teacher_name,teacher.img_url from video left join user_video on (video.video_id=user_video.video_id) right join teacher on (video.teacher_id=teacher.id) where video.video_id=#{arg0}
+        <if test="arg1 !=null">
+         and user_video.user_id=#{arg1}
+        </if>
+    </select>
+    <!--判断uservideo 是否为空-->
+    <select id="getUserVideo" resultType="int">
+        select count(id) from user_video where video_id=#{arg0} and user_id=#{arg1}
+    </select>
+
+
+    <!--用于前端视频的点赞或收藏-->
+    <select id="getVideoCode" parameterType="com.blibli.academy.project.Business.pojo.UserVideo" resultType="com.blibli.academy.project.Business.pojo.Video">
+        select video.love,video.collection,user_video.* from video, user_video where video.video_id=#{videoId} and user_video.video_id=#{videoId} and user_id=#{userId}
+    </select>
+
+    <!--更新收藏码-->
+    <update id="updateCollectionCode" parameterType="com.blibli.academy.project.Business.pojo.UserVideo">
+        update user_video set collection_code=#{collectionCode} ,collection_at =#{collectionAt} where user_id=#{userId} and video_id=#{videoId}
+    </update>
+
+   <!--更新收藏总数量-->
+    <update id="updateVideoCollection" parameterType="com.blibli.academy.project.Business.pojo.Video">
+        update video set collection=#{collection},update_at=#{updateAt} where video_id=#{videoId}
+    </update>
+
+    <!--更新点赞码-->
+    <update id="updateLoveCode" parameterType="com.blibli.academy.project.Business.pojo.UserVideo">
+        update user_video set love_code=#{loveCode},lover_at=#{loverAt} where user_id=#{userId} and video_id= #{videoId}
+    </update>
+
+    <!--更新点赞总数量-->
+    <update id="updateVideoLove" parameterType="com.blibli.academy.project.Business.pojo.Video">
+        update video set love=#{love},update_at=#{updateAt} where video_id=#{videoId}
+    </update>
+
+
+    <!--插入点赞-->
+    <insert id="insertLoveCode" parameterType="com.blibli.academy.project.Business.pojo.UserVideo">
+        insert into user_video (user_id, video_id, collection_code, love_code, lover_at,collection_at)
+        values (#{userId},#{videoId},#{collectionCode},#{loveCode},#{loverAt},#{collectionAt});
+    </insert>
+    <!--&lt;!&ndash;插入收藏&ndash;&gt;-->
+    <!--<insert id="insertCollectionCode" parameterType="com.blibli.academy.project.Business.pojo.UserVideo">-->
+        <!--insert into user_video ( user_id, video_id, collection_code, love_code, collection_at)-->
+        <!--values (#{userId},#{videoId},#{collectionCode},#{loveCode},#{collectionAt});-->
+    <!--</insert>-->
+
+
+
+    <!--获取用户的 签到表的签到信息-->
+    <select id="getUserSignId" parameterType="Long" resultType="com.blibli.academy.project.Business.pojo.UserSign">
+        select * from user_sign where user_id=#{id}
+    </select>
+
+    <!--获取用户表中的 用户的逆袭豆数量-->
+        <select id="getUserData" parameterType="Long" resultType="int">
+        select data from user where id=#{id}
+    </select>
+
+    <!--更新用户签到表-->
+    <update id="updateUserSign" parameterType="com.blibli.academy.project.Business.pojo.UserSign">
+        update user_sign set last_sign=#{lastSign},sign_details=#{signDetails},continuity_sign=#{continuitySign},history_high=#{historyHigh} where user_id=#{userId}
+    </update>
+
+    <!--更新用户的逆袭豆表-->
+    <update id="updateUserData" parameterType="com.blibli.academy.project.Business.pojo.User">
+        update user set data=#{data} where id=#{id}
+    </update>
+
+    <!---->
+    <insert id="insertUserSign" parameterType="com.blibli.academy.project.Business.pojo.UserSign">
+        insert into  user_sign(user_id, last_sign,sign_details,continuity_sign, history_high) values (#{userId},#{lastSign},null,#{continuitySign},#{historyHigh});
+    </insert>
+
+    <!--获取历史的签到数据-->
+    <select id="getHistorySignId" parameterType="Long" resultType="com.blibli.academy.project.Business.dto.UserDto">
+        select user.*,user_sign.sign_details,user_sign.continuity_sign,user_sign.history_high from user,user_sign where user.id=user_sign.user_id AND user.id=#{id}
+    </select>
+
+    <!--查询banner视频-->
+    <select id="getVideoBanner" resultType="com.blibli.academy.project.Business.pojo.Video">
+        select * from video where type=2
+    </select>
+</mapper>

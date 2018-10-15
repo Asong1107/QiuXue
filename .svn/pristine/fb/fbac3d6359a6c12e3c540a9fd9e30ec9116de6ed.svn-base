@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.blibli.academy.project.mapper.StudentDao">
+    <select id="findPageBreakByCondition" parameterType="studentQuery" resultType="studentDto">
+        select * from (
+        select s.id,s.study_type,s.title,s.covering,s.classify,s.author,
+        s.introduce,s.status,s.content,s.grade,s.subject,s.video_time,s.video_url,s.update_at,s.create_at,
+        (SELECT COUNT(id) from study_user where type = 1 and study_id = s.id)as love,
+        (SELECT COUNT(id) from study_user where type = 2 and study_id = s.id)as collect
+        from student s ) temp where 1 = 1
+        <if test="study_type==null">
+            AND study_type = 99
+        </if>
+        <if test="study_type!=null">
+            AND study_type = #{study_type}
+            <if test="title!='' and title!=null">
+                AND title LIKE '%${title}%'
+            </if>
+            <if test="author!='' and author!=null">
+                AND author LIKE '%${author}%'
+            </if>
+            <if test="id!=0 and id!=null">
+                AND id = #{id}
+            </if>
+            <if test="classify!=0 and classify!=null">
+                AND classify = #{classify}
+            </if>
+            <if test="grade!=0 and grade!=null">
+                and grade = #{grade}
+            </if>
+            <if test="subject!=0 and subject!=null">
+                and subject = #{subject}
+            </if>
+            <if test="collect!=null">
+                <if test="collect[0]!=null">
+                    and collect >= ${collect[0]}
+                </if>
+                <if test="collect[1]!=null">
+                    and ${collect[1]} >= collect
+                </if>
+            </if>
+            <if test="love!=null">
+                <if test="love[0]!=null">
+                    AND love >= ${love[0]}
+                </if>
+                <if test="love[1]!=null">
+                    AND ${love[1]} >= love
+                </if>
+            </if>
+            <if test="status!=null">
+                AND status = #{status}
+            </if>
+        </if>
+        order by update_at DESC
+    </select>
+    <update id="updateStatusByid" parameterType="Long">
+        UPDATE student s SET s.status = !s.status WHERE id = #{id}
+    </update>
+
+    <select id="findCollectArticle" resultType="com.blibli.academy.project.Business.dto.StudentArticleDto">
+        select temp.*,study_user.user_id,study_user.study_id,study_user.type,study_user.create_at as create_time from(select
+        st.id,st.covering,st.title,st.introduce,st.create_at,
+            (SELECT COUNT(id) FROM study_user WHERE type = 1 AND study_id = st.id) AS love,
+            (SELECT COUNT(id) FROM study_user WHERE type = 2 AND study_id = st.id) AS collect,
+            IF (love_s.id != 0, 1, 0) AS love_status,
+            IF (collect_s.id != 0, 1, 0) AS collect_status
+        from student st
+            LEFT OUTER JOIN study_user love_s ON love_s.type = 1
+        and love_s.study_id = st.id
+        and love_s.user_id = #{id}
+        LEFT OUTER JOIN study_user collect_s ON collect_s.type = 2
+        and collect_s.study_id = st.id
+        and collect_s.user_id = #{id}
+        WHERE
+        st.`status` = 1 and st.study_type = 1 GROUP BY st.id)
+        temp,study_user WHERE temp.id = study_user.study_id AND study_user.user_id = #{id} and study_user.type = 2 ORDER BY temp.create_at desc
+    </select>
+
+
+    <select id="findCollectVideo" parameterType="Long" resultType="com.blibli.academy.project.Business.pojo.Video">
+        select video.*,user_video.collection_code,user_video.love_code,teacher.teacher_name,teacher.img_url from video left join user_video on (video.video_id=user_video.video_id and user_video.user_id=#{userId})
+    right join teacher on (video.teacher_id=teacher.id)
+    where status=1 and user_video.collection_code=1
+    </select>
+
+    <select id="findArticelList" resultType="com.blibli.academy.project.Business.dto.HomeArticleDto">
+        SELECT * FROM (SELECT s.id, s.classify, s.content,s.covering,
+        s.create_at,s.create_by,s.grade,
+        s.introduce,s.status,s.study_type,s.subject,s.title,s.update_at,s.update_by,
+        s.video_time,s.video_url,s.author,
+        (SELECT COUNT(id) from study_user WHERE type = 1 AND study_id = s.id) as love,
+        (SELECT COUNT(id) from study_user WHERE type = 2 and study_id = s .id)as collect
+         FROM
+        student s ) temp WHERE study_type = 1 AND `status` = 1 order by update_at DESC
+    </select>
+    <!--查询点赞收藏状态-->
+    <select id="findLoveStatus" resultType="Boolean">
+        SELECT IF (
+                COUNT(study_id) > 0,
+                1,
+                0
+            ) FROM study_user WHERE study_id = #{studyId} AND user_id = #{userId} AND type = #{type}
+    </select>
+    <!--取消视频点赞收藏状态-->
+    <delete id="deleteLoveStatus">
+        DELETE FROM study_user where study_id = #{studyId} and user_id = #{userId} AND type = #{type}
+    </delete>
+    <!--点赞收藏-->
+    <insert id="insertLoveStatus">
+        INSERT INTO study_user (study_id,user_id,type,create_at)VALUES (#{studyId},#{userId},#{type},#{createAt})
+    </insert>
+
+    <select id="findCardByid" resultType="com.blibli.academy.project.Business.dto.ArticleDetaDto">
+        SELECT st.id,st.title,st.create_at,st.create_at,st.author,st.content,
+        (SELECT COUNT(id) FROM study_user WHERE type = 1 AND study_id = st.id) AS love,
+        (SELECT COUNT(id) FROM study_user WHERE type = 2 AND study_id = st.id) AS collect,
+        IF (love_s.id != 0,1,0) as love_status,
+        IF (collect_s.id != 0,1,0) as collect_status
+        from student st
+        LEFT OUTER JOIN study_user love_s ON love_s.type = 1
+        AND love_s.study_id = #{studyId}
+        AND love_s.user_id = #{userId}
+        LEFT OUTER JOIN study_user collect_s ON collect_s.type = 2
+        AND collect_s.study_id = #{studyId}
+        AND collect_s.user_id = #{userId} WHERE st.id = #{studyId} AND st.`status` = 1 AND st.study_type = 1
+    </select>
+
+    <!--Banner文章-->
+    <select id="findArticleBanner" resultType="com.blibli.academy.project.Business.dto.BannerDto">
+        SELECT * FROM (SELECT st.id, st.covering,st.title, st.study_type, st.classify,st.`status`,
+        (SELECT COUNT(id) FROM study_user WHERE type = 1 AND study_id = st.id) AS love FROM student st ) temp
+        WHERE 1 = 1 AND `status` = 1 AND classify = 1 ORDER BY love DESC LIMIT #{num}
+    </select>
+
+</mapper>

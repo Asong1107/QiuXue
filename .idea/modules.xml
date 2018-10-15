@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/academy-project-admin-service/academy-project-admin-service.iml" filepath="$PROJECT_DIR$/academy-project-admin-service/academy-project-admin-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/academy-project-admin-web/academy-project-admin-web.iml" filepath="$PROJECT_DIR$/academy-project-admin-web/academy-project-admin-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/academy-project-core/academy-project-core.iml" filepath="$PROJECT_DIR$/academy-project-core/academy-project-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/academy-project-home-service/academy-project-home-service.iml" filepath="$PROJECT_DIR$/academy-project-home-service/academy-project-home-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/academy-project-home-web/academy-project-home-web.iml" filepath="$PROJECT_DIR$/academy-project-home-web/academy-project-home-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/project.iml" filepath="$PROJECT_DIR$/project.iml" />
+    </modules>
+  </component>
+</project>

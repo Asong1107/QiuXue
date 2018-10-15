@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.blibli.academy.project.mapper.ContentDao">
+    <!--查询视频banner的个数-->
+    <select id="getBannerCount" resultType="int">
+        select count(*) from video where type=2
+    </select>
+
+    <!--删除最早的banner 视频-->
+    <delete id="deleteUserVideo">
+        delete from user_video where video_id in (select x.video_id from (select video_id from video where type=2 order by update_at  limit 1) as x);
+    </delete>
+
+    <delete id="deleteVideoId">
+        delete from video where video_id  in (select x.video_id from (select video_id from video where type=2 order by update_at  limit 1) as x);
+    </delete>
+
+    <!--视频的新增-->
+    <insert id="insertVideo" parameterType="com.blibli.academy.project.Business.pojo.Video">
+        insert into video ( title, type, video_url, cover, grade, subject, teacher_id, summary_video, text_video, banner_url,  status, create_by, update_by, create_at, update_at,video_time) VALUES
+            (#{title},#{type},#{videoUrl},#{cover},#{grade},#{subject},#{teacherId},#{summaryVideo},#{textVideo},#{bannerUrl},#{status},#{createBy},#{updateBy},#{createAt},#{updateAt},#{videoTime})
+    </insert>
+
+    <!--后台视频列表的模糊查询-->
+    <select id="getVideoList" parameterType="com.blibli.academy.project.pojo.VideoQuery" resultType="com.blibli.academy.project.Business.pojo.Video">
+        select video.video_id,video.title,video.type,video.grade,video.subject,video.teacher_id,video.collection,video.love,video.update_at,video.status ,teacher.teacher_name from video left join teacher on (video.teacher_id=teacher.id)
+        <where>
+             1=1
+            <if test="title != null">
+               AND title  LIKE '%${title}%'
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="grade != null">
+                AND grade =#{grade}
+            </if>
+            <if test="subject != null">
+               AND subject =#{subject}
+            </if>
+            <if test="collection != null">
+                <if test="collection[0] != null">
+                    AND collection >= #{collection[0]}
+                </if>
+                <if test="collection[1] != null">
+                    AND #{collection[1]} >= collection
+                </if>
+            </if>
+
+            <if test="love != null">
+                <if test="love[0] != null">
+                    AND love >=#{love[0]}
+                </if>
+                <if test="love[1] != null">
+                    AND   #{love[1]} >= love
+                </if>
+            </if>
+            <if test="teacherName != null">
+               AND teacher_name LIKE '%${teacherName}%'
+            </if>
+            <if test="status != null">
+                AND status=#{status}
+            </if>
+        </where>
+        ORDER BY update_at DESC
+    </select>
+
+
+    <!--视频上下架-->
+    <update id="updateVideoStatus" parameterType="com.blibli.academy.project.Business.pojo.Video">
+        update video set status=#{status} where video_id=#{videoId}
+    </update>
+
+
+
+
+    <!--老师的新增-->
+    <insert id="insertTeacher" parameterType="com.blibli.academy.project.pojo.Teacher">
+        insert into teacher(img_url,teacher_name, create_by, update_by, create_at, update_at) VALUES (#{imgUrl},#{teacherName},#{createBy},#{updateBy},#{createAt},#{updateAt})
+    </insert>
+
+    <!--教师列表的 查询-->
+    <select id="getTeacherList" resultType="com.blibli.academy.project.pojo.Teacher">
+        select id,teacher_name,img_url from teacher
+    </select>
+
+
+    <!--删除教师-->
+    <select id="getVideoTeacherId" parameterType="Long" resultType="int">
+        select count(*) from video where teacher_id=#{teacherId}
+    </select>
+
+    <delete id="deleteTeacherId" parameterType="Long">
+        delete from teacher where id=#{Id}
+    </delete>
+
+
+    <!--修改视频-->
+    <update id="updateVideo" parameterType="com.blibli.academy.project.pojo.VideoQuery">
+        update video set title=#{title},type=#{type},grade=#{grade},video_url=#{videoUrl},
+            subject=#{subject},teacher_id=#{teacherId},summary_video=#{summaryVideo},
+            text_video=#{textVideo},banner_url=#{bannerUrl},cover=#{cover},video_time=#{videoTime},status=1 ,update_at=#{updateAt}, update_by=#{updateBy} where video_id=#{videoId}
+    </update>
+
+    <!--后台视频详情-->
+    <select id="getVideosId" parameterType="Long" resultType="com.blibli.academy.project.Business.pojo.Video">
+        select video.*,teacher.teacher_name,teacher.img_url from video left join teacher  on (video.teacher_id=teacher.id) where video.video_id=#{videoId}
+    </select>
+</mapper>
